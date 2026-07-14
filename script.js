@@ -27,7 +27,7 @@ let pegs = [
     }
 ]
 
-player.atatchedpeg = pegs[0];
+player.atatchedPeg = pegs[0];
 document.addEventListener(
   "keydown", (e) => {
     if(e.code === "Space"){
@@ -36,7 +36,7 @@ document.addEventListener(
             return;
         }
         if(player.attatchedPeg){
-            const releaseAngle = player.angle +(Math.pi/2)*player.orbitDirection;
+            const releaseAngle = player.angle +(Math.PI/2)*player.orbitDirection;
             player.vx  = Math.cos (releaseAngle) * player.speed;
             player.vy = Math.sin (releaseAngle) *player.speed;
             player.attatchedPeg = null; 
@@ -48,10 +48,10 @@ document.addEventListener(
 
 function updateLogic(){
  if(player.attatchedPeg){
-    const angularVelocity = (player.speed / player.orbitRadius) + player.orbitDirection;
+    const angularVelocity = (player.speed / player.orbitRadius) * player.orbitDirection;
     player.angle += angularVelocity;
-    player.x = player.attatchedPeg.x + Math.cos(player.angle) + player.orbitRadius;
-    player.y = player.attatchedPeg.y + Math.sin(player.angle) + player.orbitRadius;
+    player.x = player.attatchedPeg.x + Math.cos(player.angle) * player.orbitRadius;
+    player.y = player.attatchedPeg.y + Math.sin(player.angle) * player.orbitRadius;
  }
  else{
     player.x += player.vx;
@@ -61,7 +61,7 @@ function updateLogic(){
         const distance = Math.hypot(player.x-currentPeg.x,player.y - currentPeg.y);
         if(distance <= player.orbitRadius + 5 && distance >= player.orbitRadius - 5){
             player.attatchedPeg = currentPeg;
-            player.angle = Math.atan2(player.y - currentPeg.y,player.x-currentPeg.x);\
+            player.angle = Math.atan2(player.y - currentPeg.y,player.x-currentPeg.x);
             break;
         }
     }
@@ -100,8 +100,24 @@ function render(){
     ctx.beginPath();
     ctx.arc(player.x,player.y,player.radius,0,Math.PI*2);
     ctx.fill();
+    if(isGameOver){
+        ctx.fillStyle = "white";
+        ctx.font = "30px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", canvas.width/2,canvas.height/2);
+        ctx.font = "16px monospace";
+        ctx.fillText ("press SPACE to restart", canvas.width/2,(canvas.height/2)+46);  
+    }
+}
+function gameLoop(){
+    if(!isGameOver){
+        updateLogic();
+    }
+    render();
+    requestAnimationFrame(gameLoop);
 }
 function resetGame(){
     isGameOver  =false;
     score  = 0;
 }
+gameLoop();
