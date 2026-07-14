@@ -50,8 +50,56 @@ function updateLogic(){
  if(player.attatchedPeg){
     const angularVelocity = (player.speed / player.orbitRadius) + player.orbitDirection;
     player.angle += angularVelocity;
-    
+    player.x = player.attatchedPeg.x + Math.cos(player.angle) + player.orbitRadius;
+    player.y = player.attatchedPeg.y + Math.sin(player.angle) + player.orbitRadius;
  }
+ else{
+    player.x += player.vx;
+    player.y += player.vy;
+    for ( let i = 0; i < pegs.length; i++){
+        const currentPeg = pegs[i];
+        const distance = Math.hypot(player.x-currentPeg.x,player.y - currentPeg.y);
+        if(distance <= player.orbitRadius + 5 && distance >= player.orbitRadius - 5){
+            player.attatchedPeg = currentPeg;
+            player.angle = Math.atan2(player.y - currentPeg.y,player.x-currentPeg.x);\
+            break;
+        }
+    }
+ }
+    if(player.x < 0 || player.x > canvas.width || player.y < 0 || player.y > canvas.height){
+        isGameOver = true;
+    }
+}
+
+function render(){
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    pegs.forEach(
+        peg => {
+            ctx.fillStyle = peg.color;
+            ctx.beginPath();
+            ctx.arc(peg.x,peg.y,peg.radius,0,Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.1)"   
+            ctx.setLineDash([5,5]);
+            ctx.beginPath();
+            ctx.arc(peg.x,peg.y,player.orbitRadius,0,Math.PI*2);
+            ctx.stroke();
+            ctx.setLineDash([]);//reset
+        }
+    );
+    if(player.attatchedPeg){
+        ctx.strokeStyle = "rgba(0,255,255,0.4)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(player.attatchedPeg.x,player,player.attatchedPeg.y);
+        ctx.lineTo(player.x,player.y);
+        ctx.stroke();
+    }
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.arc(player.x,player.y,player.radius,0,Math.PI*2);
+    ctx.fill();
 }
 function resetGame(){
     isGameOver  =false;
